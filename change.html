@@ -1,0 +1,220 @@
+   <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>京东轮播图</title>
+</head>
+<style>
+	*{
+		margin:0; padding:0;
+	}
+	ul{
+		list-style:none;
+	}
+	a{
+		text-decoration:none;
+	}
+	.clearfix{
+		zoom:1;
+	}
+	.clearfix:after{
+		display:block; 
+		content:''; 
+		clear: both;
+	}
+	.container{
+		position:relative;
+		width:800px; 
+		height:500px; 
+		margin:50px auto; 
+		overflow:hidden;
+	}
+	.listImg{
+		position:absolute; 
+		width:8000px; 
+		height:500px; 
+	}
+	li{
+		float:left;
+	}
+	img{
+		width:800px;
+		height: 500px;
+	}
+	/*箭头样式*/
+	.arrow{ 
+		width:30px; 
+		height:60px; 
+		line-height:60px; 
+		text-align:center; 
+		background:rgba(0,0,0,.3); 
+		color:#fff; 
+		font-size: 2em;
+	    z-index:100; 
+	    cursor:pointer; 
+	    position:absolute; 
+	    top:40%; 
+	    display:none;
+	}
+	.arrow:hover{
+		background:rgba(0,0,0,0.6);
+	}
+	#prev{
+		left:0px;
+		border-radius: 50px;
+	}
+	#next{
+		right:0px;
+		border-radius: 50px;
+	}
+	.container:hover .arrow{
+		display:block;
+	}
+	/*小按钮样式*/
+	.buttons{
+		position:absolute; 
+		bottom:20px; 
+		left:50px; 
+		z-index:100;
+	}
+	.buttons li{
+		float:left; 
+		margin-right:7px;
+	}
+	.buttons li span{
+		display:block; 
+		width:10px; 
+		height:10px; 
+		border-radius:50%; 
+		background:gray; 
+		cursor:pointer;
+	}
+	.buttons li.active span{
+		background:white;
+	}
+</style>
+<body>
+	<div class="container">
+    <div class="list">
+       <!--  轮播广告图 -->
+        <ul class="listImg clearfix" style="left:-800px;">
+            <li><a href="#"><img src="images/8.jpg" alt=""></a></li>
+            <li><a href="#"><img src="images/1.jpg" alt=""></a></li>
+            <li><a href="#"><img src="images/2.jpg" alt=""></a></li>
+            <li><a href="#"><img src="images/3.jpg" alt=""></a></li>
+            <li><a href="#"><img src="images/4.jpg" alt=""></a></li>
+            <li><a href="#"><img src="images/5.jpg" alt=""></a></li>
+            <li><a href="#"><img src="images/6.jpg" alt=""></a></li>
+            <li><a href="#"><img src="images/7.jpg" alt=""></a></li>
+            <li><a href="#"><img src="images/8.jpg" alt=""></a></li>
+            <li><a href="#"><img src="images/1.jpg" alt=""></a></li>
+        </ul>
+        <!--中间的6个小按钮-->
+        <ul class="buttons clearfix">
+            <li class="active"><span index="1"></span></li>
+            <li><span index="2"></span></li>
+            <li><span index="3"></span></li>
+            <li><span index="4"></span></li>
+            <li><span index="5"></span></li>
+            <li><span index="6"></span></li>
+            <li><span index="7"></span></li>
+            <li><span index="8"></span></li>
+
+        </ul>
+        <!--左右点击按钮-->
+        <a href="#" class="arrow" id="prev">&lt;</a>
+        <a href="#" class="arrow" id="next">&gt;</a>
+    </div>
+</div>
+ 
+<script src="jquery.js"></script>
+<script>
+    var lists = $('.listImg');
+    //获取所有的小圆点
+    var btns = $('.buttons li');
+    //当前播放的是哪张图片对应的小圆点
+    var index =1;
+    //广告图片的张数
+    var len = 8;
+    //间隔时间，多少毫秒播一次
+    var interval = 3000;
+    var timer;
+    //滚动图片
+    function play(offset){
+        var left = parseInt(lists.css('left'))+offset;
+        if (offset>0) {
+            offset = '+=' + offset;
+        }
+        else {
+            offset = '-=' + Math.abs(offset);
+        }
+        lists.animate({'left':offset},200,function(){
+            if(left>-800){
+                lists.css('left', -800*len);
+            }else if(left< -800*len ){
+                lists.css('left', -800);
+            }
+        })
+    }
+    //启动动画
+    function start() {
+        timer = setInterval(function () {
+            $('#next').trigger('click');
+            play();
+        }, interval);
+    }
+    //停止动画
+    function stop() {
+        clearTimeout(timer);
+    }
+    //点击左箭头
+    $('#prev').click(function(e){
+        e.preventDefault();
+        if(lists.is(':animated')){
+            return;
+        }
+        //index=1，就让index=8，否则加1
+        index==1?index=len:(index-=1);
+        showButton();
+        play(800);
+    });
+    //点击右箭头
+    $('#next').click(function(e){
+        e.preventDefault();
+        if(lists.is(':animated')){
+            return;
+        }
+        //index=8，就让index=1，否则减1
+        index==len?index=1:(index+=1);
+        showButton();
+        play(-800);
+    });
+    //“激活”对应的小圆点
+    function showButton(){
+        //btns的下标从0开始,index从1到8，共8个小圆点，实际的图片下标是index-1
+        btns.eq(index-1).addClass('active').siblings('.active').removeClass('active');
+    }
+    //点击小圆点，切换图片
+    btns.click(function(){
+        //如果被点击的小圆点已经是被选中了的那一个（简单说就是重复点一个小圆点）
+        // 而被选中的小圆点都会加上一个active
+        if($(this).hasClass('active') || lists.is(':animated')){
+            return; //直接退出点击事件的方法
+        }
+        //获取被点击的小圆点的自定义属性index的值
+        var targetIndex = parseInt($(this).children().attr('index'));
+        //定义图片的偏移量
+        var offset = -800 * (targetIndex - index);
+ 
+        play(offset);
+        //更新当前的index
+        index = targetIndex;
+        showButton();
+    });
+    $('.container').hover(stop, start); //鼠标移入停止，移出启动
+    start();
+</script>
+</body>
+</html>
